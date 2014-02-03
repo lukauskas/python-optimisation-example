@@ -25,10 +25,19 @@ def align(left, right):
             match_score = matrix[i-1, j-1] + MATCH_SCORE if symbol_left == symbol_right else MISMATCH_SCORE
             deletion = matrix[i-1, j] + DELETION_SCORE
             insertion = matrix[i, j-1] + INSERTION_SCORE
-            matrix[i, j], traceback[i, j] = max((match_score, (i-1, j-1)),
-                                                (deletion, (i-1, j)),
-                                                (insertion, (i, j-1)),
-                                                key=lambda x: x[0])
+
+            if match_score >= deletion and match_score >= insertion:
+                max_score = match_score
+                traceback_pos = i-1, j-1
+            elif deletion > match_score and deletion >= insertion:
+                max_score = deletion
+                traceback_pos = i-1, j
+            else:
+                max_score = insertion
+                traceback_pos = i, j-1
+
+            matrix[i, j] = max_score
+            traceback[i, j] = traceback_pos
 
     return matrix[len(left)-1, len(right)-1], traceback
 
