@@ -8,59 +8,59 @@ def align(left, right):
     matrix = {}
 
     # Initialise
-    matrix[-1, -1] = 0
+    matrix[0, 0] = 0
     traceback = {}
     for i in xrange(len(left)):
-        matrix[i, -1] = (i+1) * DELETION_SCORE
-        traceback[i, -1] = i-1, -1
+        matrix[i+1, 0] = (i+1) * DELETION_SCORE
+        traceback[i+1, 0] = i, 0
 
     for i in xrange(len(right)):
-        matrix[-1, i] = (i+1) * INSERTION_SCORE
-        traceback[-1, i] = -1, i-1
+        matrix[0, i+1] = (i+1) * INSERTION_SCORE
+        traceback[0, i+1] = 0, i
 
 
 
     for i, symbol_left in enumerate(left):
         for j, symbol_right in enumerate(right):
-            match_score = matrix[i-1, j-1] + MATCH_SCORE if symbol_left == symbol_right else MISMATCH_SCORE
-            deletion = matrix[i-1, j] + DELETION_SCORE
-            insertion = matrix[i, j-1] + INSERTION_SCORE
+            match_score = matrix[i, j] + MATCH_SCORE if symbol_left == symbol_right else MISMATCH_SCORE
+            deletion = matrix[i, j+1] + DELETION_SCORE
+            insertion = matrix[i+1, j] + INSERTION_SCORE
 
             if match_score >= deletion and match_score >= insertion:
                 max_score = match_score
-                traceback_pos = i-1, j-1
+                traceback_pos = i, j
             elif deletion > match_score and deletion >= insertion:
                 max_score = deletion
-                traceback_pos = i-1, j
+                traceback_pos = i, j+1
             else:
                 max_score = insertion
-                traceback_pos = i, j-1
+                traceback_pos = i+1, j
 
-            matrix[i, j] = max_score
-            traceback[i, j] = traceback_pos
+            matrix[i+1, j+1] = max_score
+            traceback[i+1, j+1] = traceback_pos
 
-    return matrix[len(left)-1, len(right)-1], traceback
+    return matrix[len(left), len(right)], traceback
 
 def construct_alignment(left, right, traceback):
     sequence_l = []
     sequence_r = []
 
     # Initialise at last column
-    l, r = len(left)-1, len(right)-1
+    l, r = len(left), len(right)
 
     # While we're not at the border
-    while l > -1 or r > -1:
+    while l > 0 or r > 0:
         new_l, new_r = traceback[l, r]
 
         if new_l == l:  # insertion
             sequence_l.append('-')
-            sequence_r.append(right[r])
+            sequence_r.append(right[r-1])
         elif new_r == r:  # deletion
-            sequence_l.append(left[l])
+            sequence_l.append(left[l-1])
             sequence_r.append('-')
         else:   # match
-            sequence_l.append(left[l])
-            sequence_r.append(right[r])
+            sequence_l.append(left[l-1])
+            sequence_r.append(right[r-1])
 
         l, r = new_l, new_r
 
