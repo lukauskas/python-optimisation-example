@@ -1,57 +1,25 @@
-MATCH_SCORE = 1
-MISMATCH_SCORE = 0
-DELETION_SCORE = 0
-INSERTION_SCORE = 0
-
-def align(left, right):
-
-    matrix = {}
-
-    # Initialise
-    matrix[-1, -1] = 0
-    traceback = {}
-    for i in xrange(len(left)):
-        matrix[i, -1] = (i+1) * DELETION_SCORE
-        traceback[i, -1] = i-1, -1
-
-    for i in xrange(len(right)):
-        matrix[-1, i] = (i+1) * INSERTION_SCORE
-        traceback[-1, i] = -1, i-1
-
-
-
-    for i, symbol_left in enumerate(left):
-        for j, symbol_right in enumerate(right):
-            match_score = matrix[i-1, j-1] + MATCH_SCORE if symbol_left == symbol_right else MISMATCH_SCORE
-            deletion = matrix[i-1, j] + DELETION_SCORE
-            insertion = matrix[i, j-1] + INSERTION_SCORE
-            matrix[i, j], traceback[i, j] = max((match_score, (i-1, j-1)),
-                                                (deletion, (i-1, j)),
-                                                (insertion, (i, j-1)),
-                                                key=lambda x: x[0])
-
-    return matrix[len(left)-1, len(right)-1], traceback
+from align import align
 
 def construct_alignment(left, right, traceback):
     sequence_l = []
     sequence_r = []
 
     # Initialise at last column
-    l, r = len(left)-1, len(right)-1
+    l, r = len(left), len(right)
 
     # While we're not at the border
-    while l > -1 or r > -1:
+    while l > 0 or r > 0:
         new_l, new_r = traceback[l, r]
 
         if new_l == l:  # insertion
             sequence_l.append('-')
-            sequence_r.append(right[r])
+            sequence_r.append(right[r-1])
         elif new_r == r:  # deletion
-            sequence_l.append(left[l])
+            sequence_l.append(left[l-1])
             sequence_r.append('-')
         else:   # match
-            sequence_l.append(left[l])
-            sequence_r.append(right[r])
+            sequence_l.append(left[l-1])
+            sequence_r.append(right[r-1])
 
         l, r = new_l, new_r
 
