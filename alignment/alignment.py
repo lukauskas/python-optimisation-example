@@ -1,4 +1,4 @@
-from align_cythonised import align
+from align import align
 
 def construct_alignment(left, right, traceback):
     sequence_l = []
